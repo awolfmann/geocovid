@@ -24,10 +24,10 @@ class DataScheduler(BaseScheduler):
     def step(self, gdf: GeoDataFrame) -> None:
         """Execute the step of all agents, one at a time, in random order."""
         for key, agent in self.agent_buffer():
-            shape = None
-            geom = gdf[gdf['id'] == key]['geometry']
-            if not geom.empty:
-                shape = geom.item()
+            try:
+                shape = gdf.loc[key]['geometry']
+            except:
+                shape = None
             agent.step(shape)
         self.steps += 1
         self.time += 1

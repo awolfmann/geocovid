@@ -24,7 +24,7 @@ def preprocess_time(df: DataFrame):
 
 def preprocess_id(df: DataFrame):
     """Preprocess id as category."""
-    df['id'] = df['id'].astype('category')
+    df = df.set_index('id')
 
 def preprocess_geo(df: DataFrame):
     """Transform df to geo df."""
