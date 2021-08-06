@@ -16,6 +16,7 @@ pyarrow = "^5.0.0"
 ipython = "^7.26.0"
 traitlets = "^5.0.5"
 ipykernel = "^6.0.3"
+line-profiler = "^3.3.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
