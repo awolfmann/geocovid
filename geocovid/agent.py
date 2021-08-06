@@ -3,7 +3,9 @@
 import enum
 import numpy as np
 
+from mesa import Model
 from mesa_geo.geoagent import GeoAgent
+from shapely.geometry.base import BaseGeometry
 
 
 class Status(enum.IntEnum):
@@ -17,7 +19,12 @@ class Status(enum.IntEnum):
 class PersonAgent(GeoAgent):
     """An agent with fixed initial position and status."""
 
-    def __init__(self, unique_id, model, shape):
+    def __init__(
+        self,
+        unique_id: str,
+        model: Model,
+        shape: BaseGeometry
+    ):
         """Init method."""
         super().__init__(unique_id, model, shape)
         self.position = None
@@ -25,7 +32,9 @@ class PersonAgent(GeoAgent):
         self.infection_time = 0
         self.infected_at = 0
 
-    def step(self, shape=None) -> None:
+    def step(self,
+        shape: BaseGeometry = None
+        ) -> None:
         """One step of the agent."""
         self.check()
         self.interact()
@@ -44,7 +53,7 @@ class PersonAgent(GeoAgent):
             elif self.model.schedule.time - self.infected_at >= self.model.treatment_period:
                 self.status = Status.RECOVERED
 
-    def move(self, shape) -> None:
+    def move(self, shape: BaseGeometry = None) -> None:
         """
         Move the agent in the space.
 

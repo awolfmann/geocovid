@@ -4,8 +4,10 @@ from mesa.datacollection import DataCollector
 from mesa import Model
 from mesa_geo import GeoSpace
 
-from agent import PersonAgent
-from scheduler import DataScheduler
+from geopandas import GeoDataFrame
+
+from geocovid.agent import PersonAgent, Status
+from geocovid.scheduler import DataScheduler
 
 
 class GeoCovidModel(Model):
@@ -30,16 +32,21 @@ class GeoCovidModel(Model):
         self.current_hour = None
         self.current_date = None
 
-        self.datacollector = DataCollector(model_reporters={"S": compute_S,
-                                                            "I": compute_I,
-                                                            "R": compute_R,
-                                                            "D": compute_D},
+        self.datacollector = DataCollector(model_reporters={"S": compute_s,
+                                                            "I": compute_i,
+                                                            "R": compute_r,
+                                                            "D": compute_d
+                                                            },
                                            agent_reporters={"Status": "status",
                                                             "Position": "pos"}
                                            )
+        print("model initialized")
 
 
-    def create_new_agents(self, gdf):
+    def create_new_agents(
+        self,
+        gdf: GeoDataFrame
+        ):
         """
         Create new agents not currently present in the model.
 
@@ -56,33 +63,35 @@ class GeoCovidModel(Model):
             new_agents.append(a)
 
         self.grid.add_agents(new_agents)
+        print("new agents created")
 
-    def step(self, gdf):
+    def step(self, gdf: GeoDataFrame):
         """Run one step of the model."""
         self.create_new_agents(gdf)
         self.schedule.step(gdf)
-        self.grid._recreate_rtree()  # Recalculate spatial tree, because agents are moving
-
+        self.grid._recreate_rtree()  # Recalculate spatial tree, agents are moving
         self.datacollector.collect(self)
 
 
-
-
-def compute_S(model):
+def compute_s(model: Model):
+    """Compute suceptible."""
     agents = len([agent.status for agent in model.schedule.agents if agent.status == Status.SUSCEPTIBLE])
     return agents
 
 
-def compute_I(model):
+def compute_i(model: Model):
+    """Compute infected."""
     agents = len([agent.status for agent in model.schedule.agents if agent.status == Status.INFECTED])
     return agents
 
 
-def compute_R(model):
+def compute_r(model: Model):
+    """Compute Recovered."""
     agents = len([agent.status for agent in model.schedule.agents if agent.status == Status.RECOVERED])
     return agents
 
 
-def compute_D(model):
-    agents = model.num_agents - len(model.schedule.agents)
-    return  agents
+def compute_d(model: Model):
+    """Compute deaths."""
+    # TO DO!
+    return 0
