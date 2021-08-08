@@ -1,9 +1,13 @@
 """Scheduler based on Mesa project."""
+import logging
+
 from typing import Iterator, Tuple
 
 from geopandas import GeoDataFrame
 from mesa.time import BaseScheduler
 from mesa_geo.geoagent import GeoAgent
+
+logger = logging.getLogger(__name__)
 
 
 class DataScheduler(BaseScheduler):
@@ -29,5 +33,6 @@ class DataScheduler(BaseScheduler):
             except:
                 shape = None
             agent.step(shape)
+        logger.info("scheduler step %f executed" % self.steps)
         self.steps += 1
         self.time += 1
