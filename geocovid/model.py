@@ -1,4 +1,5 @@
 """Geo Covid Model."""
+import logging
 
 from mesa.datacollection import DataCollector
 from mesa import Model
@@ -9,16 +10,20 @@ from geopandas import GeoDataFrame
 from geocovid.agent import PersonAgent, Status
 from geocovid.scheduler import DataScheduler
 
+logger = logging.getLogger(__name__)
+
 
 class GeoCovidModel(Model):
     """A model with some number of agents."""
 
     def __init__(self,
-                 infection_prob,
-                 death_prob,
-                 treatment_period,
-                 exposure_distance,
-                 seed=None):
+                 infection_prob: float,
+                 death_prob: float,
+                 treatment_period: int,
+                 exposure_distance: float,
+                 init_infected: int,
+                 seed: int = None
+                 ):
         """Model initialization."""
         self.schedule = DataScheduler(self)
         self.grid = GeoSpace()
@@ -31,6 +36,7 @@ class GeoCovidModel(Model):
         self.running = True
         self.current_hour = None
         self.current_date = None
+        self.init_infected = init_infected
 
         self.datacollector = DataCollector(model_reporters={"S": compute_s,
                                                             "I": compute_i,
@@ -38,15 +44,11 @@ class GeoCovidModel(Model):
                                                             "D": compute_d
                                                             },
                                            agent_reporters={"Status": "status",
-                                                            "Position": "pos"}
+                                                            "Position": "shape"}
                                            )
-        print("model initialized")
+        logger.info("model initialized")
 
-
-    def create_new_agents(
-        self,
-        gdf: GeoDataFrame
-        ):
+    def _create_new_agents(self, gdf: GeoDataFrame) -> None:
         """
         Create new agents not currently present in the model.
 
@@ -63,35 +65,46 @@ class GeoCovidModel(Model):
             new_agents.append(a)
 
         self.grid.add_agents(new_agents)
-        print("new agents created")
+        logger.info("new %f agents created" % len(new_agents))
 
-    def step(self, gdf: GeoDataFrame):
+    def _init_infected(self) -> None:
+        selected_agents = self.random.choices(self.schedule.agents,
+                                              k=self.init_infected)
+        for a in selected_agents:
+            a.status = Status.INFECTED
+
+        logger.info("int %f agents infected" % len(selected_agents))
+
+    def step(self, gdf: GeoDataFrame) -> None:
         """Run one step of the model."""
-        self.create_new_agents(gdf)
+        self._create_new_agents(gdf)
+        if self.steps == 0:
+            self._init_infected()
         self.schedule.step(gdf)
         self.grid._recreate_rtree()  # Recalculate spatial tree, agents are moving
-        # self.datacollector.collect(self)
+        self.datacollector.collect(self)
+        logger.info("model step %f executed" % self.steps)
+        self.steps += 1
 
 
-def compute_s(model: Model):
+def compute_s(model: Model) -> int:
     """Compute suceptible."""
     agents = len([agent.status for agent in model.schedule.agents if agent.status == Status.SUSCEPTIBLE])
     return agents
 
 
-def compute_i(model: Model):
+def compute_i(model: Model) -> int:
     """Compute infected."""
     agents = len([agent.status for agent in model.schedule.agents if agent.status == Status.INFECTED])
     return agents
 
 
-def compute_r(model: Model):
+def compute_r(model: Model) -> int:
     """Compute Recovered."""
     agents = len([agent.status for agent in model.schedule.agents if agent.status == Status.RECOVERED])
     return agents
 
 
-def compute_d(model: Model):
+def compute_d(model: Model) -> int:
     """Compute deaths."""
-    # TO DO!
-    return 0
+    return model.deaths
