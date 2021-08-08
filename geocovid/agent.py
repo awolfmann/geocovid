@@ -27,7 +27,7 @@ class PersonAgent(GeoAgent):
     ):
         """Init method."""
         super().__init__(unique_id, model, shape)
-        self.position = None
+        self.pos = None
         self.status = Status.SUSCEPTIBLE
         self.infection_time = 0
         self.infected_at = 0
