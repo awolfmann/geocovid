@@ -48,7 +48,6 @@ class PersonAgent(GeoAgent):
             is_alive = np.random.choice([0, 1], p=[death_prob, 1 - death_prob])
             if is_alive == 0:
                 self.model.schedule.remove(self)
-                # removerlo del geospace
                 self.model.deaths += 1
             elif self.model.schedule.time - self.infected_at >= self.model.treatment_period:
                 self.status = Status.RECOVERED
@@ -73,3 +72,4 @@ class PersonAgent(GeoAgent):
                     if infect:
                         c.status = Status.INFECTED
                         c.infected_at = self.model.schedule.time
+                        self.model.infections_step += 1

@@ -27,21 +27,23 @@ class GeoCovidModel(Model):
         """Model initialization."""
         self.schedule = DataScheduler(self)
         self.grid = GeoSpace()
-        self.steps = 0
         self.infection_prob = infection_prob
         self.death_prob = death_prob
         self.treatment_period = treatment_period
         self.exposure_distance = exposure_distance
+        self.init_infected = init_infected
+        self.steps = 0
         self.deaths = 0
         self.running = True
         self.current_hour = None
         self.current_date = None
-        self.init_infected = init_infected
+        self.infections_step = 0
 
         self.datacollector = DataCollector(model_reporters={"S": compute_s,
                                                             "I": compute_i,
                                                             "R": compute_r,
-                                                            "D": compute_d
+                                                            "D": compute_d,
+                                                            "IS": compute_is
                                                             },
                                            agent_reporters={"Status": "status",
                                                             "Position": "shape"}
@@ -85,6 +87,7 @@ class GeoCovidModel(Model):
         self.datacollector.collect(self)
         logger.info("model step %f executed" % self.steps)
         self.steps += 1
+        self.infections_step = 0  # reset infections per step
 
 
 def compute_s(model: Model) -> int:
@@ -108,3 +111,9 @@ def compute_r(model: Model) -> int:
 def compute_d(model: Model) -> int:
     """Compute deaths."""
     return model.deaths
+
+
+def compute_is(model: Model) -> int:
+    """Compute infections per step."""
+    return model.infections_step
+
