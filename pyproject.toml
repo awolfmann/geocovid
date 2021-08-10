@@ -17,6 +17,8 @@ ipython = "^7.26.0"
 traitlets = "^5.0.5"
 ipykernel = "^6.0.3"
 line-profiler = "^3.3.0"
+pyspark = "^3.0.0"
+apache-sedona = "^1.0.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
