@@ -2,7 +2,7 @@
 name = "geocovid"
 version = "0.1.0"
 description = ""
-authors = ["Ariel Wolfmann <ariel.wolfmann@rappi.com>"]
+authors = ["Ariel Wolfmann <awolfmann@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
