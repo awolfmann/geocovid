@@ -7,11 +7,14 @@ import tarfile
 
 import click
 
+from geocovid.constants import DATA_DIR, TMP_DIR
 from geocovid.data_pipeline import extract_data_spark, transform_data_spark
 from geocovid.model import GeoCovidModel
 from geocovid.utils import start_spark
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
+logging.info("test")
 
 
 @click.command()
@@ -23,26 +26,24 @@ def main():
 
     """
     gcm = GeoCovidModel()
-    path_gz = """/Users/awolfmann/Documents/data_eng_challenge/grandata-challenge/
-                geocovid/data/iso_date=2020-06-01.tar.gz"""
-    files = [file for file in glob.glob("""/Users/awolfmann/Documents/data_eng_challenge/grandata-challenge/
-                geocovid/data/*.tar.gz""")]
+    files = glob.glob(os.path.join(DATA_DIR, "*.tar.gz"))
     sorted_files = sorted(files)
     spark = start_spark()
-    with tarfile.open(path_gz, "r:gz") as tfile:
-        for member in tfile.getmembers():
-            if member.isdir():
-                logger.info(" dirname %s", member.name)
-                sdf = extract_data_spark(os.path.basename(member.name), spark)
-                logger.info("extracted data")
-                gdf = transform_data_spark(sdf, spark)
-                logger.info("transformed data")
-                hours = gdf.index.levels[0]
+    for file in sorted_files[:1]:
+        with tarfile.open(file, "r:gz") as tfile:
+            path = os.path.join(TMP_DIR, os.path.basename(file).split(".")[0])
+            tfile.extractall(path=path, members=tfile)
+            logger.info("dirname %s", path)
+            sdf = extract_data_spark(path, spark)
+            logger.info("extracted data")
+            gdf = transform_data_spark(sdf, spark)
+            logger.info("transformed data")
+            hours = gdf.index.levels[0]
 
-                for hour in hours:
-                    gcm.step(gdf.loc[hour, :])
-                    logger.info("data collector %s", gcm.datacollector.model_vars)
-        tfile.close()
+            for hour in hours:
+                gcm.step(gdf.loc[hour, :])
+                logger.info("data collector %s", gcm.datacollector.model_vars)
+            tfile.close()
 
 
 if __name__ == "__main__":
