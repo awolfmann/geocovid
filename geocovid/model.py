@@ -50,19 +50,29 @@ class GeoCovidModel(Model):
                                            )
         logger.info("model initialized")
 
-    def _create_new_agents(self, gdf: GeoDataFrame) -> None:
+    def _create_new_agents(
+        self, 
+        # gdf: GeoDataFrame
+        gdf
+        ) -> None:
         """
         Create new agents not currently present in the model.
 
         Based on a given GeoDataFrame.
         """
         new_agents = []
-        step_agents_ids = set(gdf.index)
+        # step_agents_ids = set(gdf.index)
+        step_agents_ids = set([i.id for i in gdf.select('id')
+                                                .distinct()
+                                                .collect()])
         current_agents_ids = set(self.schedule._agents.keys())
         new_agents_ids = list(step_agents_ids - current_agents_ids)
-        new_gdf = gdf[gdf.index.isin(new_agents_ids)]
-        for ix, r in new_gdf.iterrows():
-            a = PersonAgent(ix, self, r['geometry'])
+        new_gdf = gdf[gdf.id.isin(new_agents_ids)]
+        # new_gdf = gdf[gdf.index.isin(new_agents_ids)]
+        # for ix, r in new_gdf.iterrows():
+        #    a = PersonAgent(ix, self, r['geometry'])
+        for r in new_gdf.collect():
+            a = PersonAgent(r['id'], self, r['geometry'])
             self.schedule.add(a)
             new_agents.append(a)
 

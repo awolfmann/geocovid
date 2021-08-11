@@ -25,11 +25,15 @@ class DataScheduler(BaseScheduler):
             if key in self._agents:
                 yield key, self._agents[key]
 
-    def step(self, gdf: GeoDataFrame) -> None:
+    def step(self, 
+        # gdf: GeoDataFrame
+        gdf
+        ) -> None:
         """Execute the step of all agents, one at a time, in random order."""
         for key, agent in self.agent_buffer():
             try:
-                shape = gdf.loc[key]['geometry']
+                # shape = gdf.loc[key]['geometry']
+                shape = gdf.where(gdf.id == key).first().asDict()['geometry']
             except:
                 shape = None
             agent.step(shape)
