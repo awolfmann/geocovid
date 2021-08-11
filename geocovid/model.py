@@ -1,5 +1,7 @@
 """Geo Covid Model."""
+import enum
 import logging
+from typing import List, Union
 
 from mesa.datacollection import DataCollector
 from mesa import Model
@@ -9,22 +11,46 @@ from geopandas import GeoDataFrame
 
 from geocovid.agent import PersonAgent, Status
 from geocovid.scheduler import DataScheduler
+from geocovid.constants import (DEATH_PROB, INFECTION_PROB, TREATMENT_PERIOD,
+                                EXPOSURE_DISTANCE, INIT_INFECTED,
+                                MIN_DEATH_PERIOD)
 
 logger = logging.getLogger(__name__)
+
+
+class StepSize(enum.IntEnum):
+    """Agent Status."""
+
+    DAY = 1
+    HOUR = 24
+    MINUTE = 24 * 60
 
 
 class GeoCovidModel(Model):
     """A model with some number of agents."""
 
     def __init__(self,
-                 infection_prob: float,
-                 death_prob: float,
-                 treatment_period: int,
-                 exposure_distance: float,
-                 init_infected: int,
+                 infection_prob: float = INFECTION_PROB,
+                 death_prob: float = DEATH_PROB,
+                 treatment_period: int = TREATMENT_PERIOD,
+                 exposure_distance: float = EXPOSURE_DISTANCE,
+                 init_infected: Union[int, List] = INIT_INFECTED,
+                 min_death_period: int = MIN_DEATH_PERIOD,
                  seed: int = None
-                 ):
-        """Model initialization."""
+                 ) -> None:
+        """Geo Covid Model initialization.
+
+        Parameters
+        ----------
+        infection_prob: float = INFECTION_PROB,
+        death_prob: float = DEATH_PROB,
+        treatment_period: int = TREATMENT_PERIOD,
+        exposure_distance: float = EXPOSURE_DISTANCE,
+        init_infected: Union[int, List] = INIT_INFECTED,
+        min_death_period: int = MIN_DEATH_PERIOD,
+        seed: int = None
+
+        """
         self.schedule = DataScheduler(self)
         self.grid = GeoSpace()
         self.infection_prob = infection_prob
@@ -32,6 +58,7 @@ class GeoCovidModel(Model):
         self.treatment_period = treatment_period
         self.exposure_distance = exposure_distance
         self.init_infected = init_infected
+        self.min_death_period = min_death_period
         self.steps = 0
         self.deaths = 0
         self.running = True
@@ -70,8 +97,13 @@ class GeoCovidModel(Model):
         logger.info("new %f agents created" % len(new_agents))
 
     def _init_infected(self) -> None:
-        selected_agents = self.random.choices(self.schedule.agents,
-                                              k=self.init_infected)
+        if isinstance(self.init_infected, List):
+            selected_agents = [a for a in self.init_infected if a in self.schedule.agents]
+            proportion = len(selected_agents) / len(self.init_infected)
+            logger.info("init infected from list")
+        else:
+            selected_agents = self.random.choices(self.schedule.agents,
+                                                  k=self.init_infected)
         for a in selected_agents:
             a.status = Status.INFECTED
 
@@ -91,29 +123,85 @@ class GeoCovidModel(Model):
 
 
 def compute_s(model: Model) -> int:
-    """Compute suceptible."""
+    """
+    Compute suceptible.
+
+    Parameters
+    ----------
+    model : Model
+        Model to compute metrics from.
+    Returns
+    -------
+    int
+        amount of suceptible agents.
+    """
     agents = len([agent.status for agent in model.schedule.agents if agent.status == Status.SUSCEPTIBLE])
     return agents
 
 
 def compute_i(model: Model) -> int:
-    """Compute infected."""
+    """
+    Compute infected.
+
+    Parameters
+    ----------
+    model : Model
+        Model to compute metrics from.
+    Returns
+    -------
+    int
+        amount of infected agents.
+    """
     agents = len([agent.status for agent in model.schedule.agents if agent.status == Status.INFECTED])
     return agents
 
 
 def compute_r(model: Model) -> int:
-    """Compute Recovered."""
+    """
+    Compute Recovered.
+
+    Parameters
+    ----------
+    model : Model
+        Model to compute metrics from.
+    Returns
+    -------
+    int
+        amount of recovered agents.
+
+    """
     agents = len([agent.status for agent in model.schedule.agents if agent.status == Status.RECOVERED])
     return agents
 
 
 def compute_d(model: Model) -> int:
-    """Compute deaths."""
+    """
+    Compute deaths.
+
+    Parameters
+    ----------
+    model : Model
+        Model to compute metrics from.
+    Returns
+    -------
+    int
+        amount of dead agents.
+
+    """
     return model.deaths
 
 
 def compute_is(model: Model) -> int:
-    """Compute infections per step."""
-    return model.infections_step
+    """
+    Compute infections per step.
 
+    Parameters
+    ----------
+    model : Model
+        Model to compute metrics from.
+    Returns
+    -------
+    int
+        amount of new infected agents in a step.
+    """
+    return model.infections_step

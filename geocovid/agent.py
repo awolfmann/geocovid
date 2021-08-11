@@ -44,13 +44,18 @@ class PersonAgent(GeoAgent):
         """Check agent status."""
         if self.status == Status.INFECTED:
             death_prob = self.model.death_prob
+            min_death_period = self.model.min_death_period
+            elapsed_time = self.model.schedule.time - self.infected_at
+            treatment_period = self.model.treatment_period
             np.random.seed = self.random.seed
-            is_alive = np.random.choice([0, 1], p=[death_prob, 1 - death_prob])
-            if is_alive == 0:
-                self.model.schedule.remove(self)
-                self.model.deaths += 1
-            elif self.model.schedule.time - self.infected_at >= self.model.treatment_period:
-                self.status = Status.RECOVERED
+
+            if elapsed_time >= min_death_period:
+                is_alive = np.random.choice([0, 1], p=[death_prob, 1 - death_prob])
+                if is_alive == 0:
+                    self.model.schedule.remove(self)
+                    self.model.deaths += 1
+                elif elapsed_time >= self.model.treatment_period:
+                    self.status = Status.RECOVERED
 
     def move(self, shape: BaseGeometry = None) -> None:
         """
