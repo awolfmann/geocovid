@@ -1,5 +1,50 @@
 # Geocovid
-Covid simulation based on a SIR Model, using Geospatial data from cellphones GPS.
+Covid simulation based on a Agent Based - [SIR Model](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SIR_model), using Geospatial data from cellphones GPS.
+The package assumes [Spark 3.0](https://spark.apache.org/) and [Sedona](https://sedona.apache.org/) previously installed.
+Data provided can be download from [here](https://drive.google.com/drive/folders/1lR8_ijSqXj7orvrlmvIXe5flbxI31PMP).
+
+## Main steps
+* Data processing: data provided are in a compressed files with a set of parquet files inside, for 21 consecutive days.
+    - Data columns: Id, timestamp, latitude, longitude, geohash_12.
+    - For the extraction process, data is unpacked and then loaded as Spark Dataframes.
+    -  Then Apache Sedona is used to build and operate over the Geospatial Data. Specially for aggregating data per hour to build a Polygon.
+    - Grouped data of each user per hour building a Polygon. If the Polygon is too big, the centroid is imputed as its position.
+    - Finally the output is a GeoPandas Dataframe in order to serve as input for the simulation.
+
+* Model simulation
+    - A [SIR Model](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SIR_model) is implemented based on [Mesa](https://mesa.readthedocs.io/en/stable/#) and [Mesa-geo](https://github.com/Corvince/mesa-geo) Python libraries, but extendend to consume data about positions at each step.
+* Visualization
+    - Mesa and Mesa-geo provides some visualization modules.
+    - A 2d (lat, long) histogram is provided as result of the simulation
+    - Timeline evolution with main metrics.
+
+## Modelling Asumptions
+* Discretized modelling by 1hour step.
+* Grouped data of each user per hour building a Polygon. If the Polygon is too big, the centroid is imputed as its position.
+* Latitutde and Longitude information is used, even geohash_12 has a better precision
+* Exposed time is ignored. If there is a contact between the Polygon in the one hour step, the model add the contact as a possible candidate for a new infected agent.
+
+## Improvement Opportunities
+* Data processing:
+    - Reduce timeframe aggregation
+    - Remove Pandas/GeoPandas dependency
+    - Remove hardcoded values in SparkSQL.
+* Modelling:
+    - Include exposure time and confidence intervals.
+    - Explore more complex models like SEIR, or Network based.
+* Visualization:
+    - Better usage and extend the  MapModules provided by Mesa-geo library.
+* Productionalization:
+    - Dockerize the project.
+    - Increase test coverage.
+    - Parallelize data procesing with Spark on an EMR cluster.
+    - Use Airflow as orchestrator for monitoring each step of the pipeline.
+    - Improve Error handling.
+    - CI integrations.
+    - Improve processing performance.
+
+
+
 
 # Installation
 ## Installation with Poetry (Recommended)
