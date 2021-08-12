@@ -46,7 +46,7 @@ geocovid
 ```
 
 ## Running
-For running purpose, a [main.py](./geocovid/main.py) file was created that instantiate the extractors and execute them depending on the configuration set. It is also executable with CLI using [Click](https://click.palletsprojects.com/en/8.0.x/) package.
+For running purpose, a [main.py](./geocovid/main.py) was created. It is also executable with CLI using [Click](https://click.palletsprojects.com/en/8.0.x/) package.
 
 ### Running Procedure
 Example command to run this package:
