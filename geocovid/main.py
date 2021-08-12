@@ -1,6 +1,7 @@
 """Main file CLI for run the simulation of the Geo Covid Model."""
 
 import glob
+import json
 import logging
 import os
 import tarfile
@@ -29,7 +30,7 @@ def main():
     files = glob.glob(os.path.join(DATA_DIR, "*.tar.gz"))
     sorted_files = sorted(files)
     spark = start_spark()
-    for file in sorted_files[:1]:
+    for file in sorted_files[:3]:
         with tarfile.open(file, "r:gz") as tfile:
             path = os.path.join(TMP_DIR, os.path.basename(file).split(".")[0])
             tfile.extractall(path=path, members=tfile)
@@ -44,6 +45,10 @@ def main():
                 gcm.step(gdf.loc[hour, :])
                 logger.info("data collector %s", gcm.datacollector.model_vars)
             tfile.close()
+
+    with open("results.json", "w") as outjson:
+        logger.info("dumping results to json")
+        json.dump(gcm.datacollector.model_vars, outjson)
 
 
 if __name__ == "__main__":
