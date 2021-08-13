@@ -1,11 +1,9 @@
 """Scheduler based on Mesa project."""
 import logging
-
 from typing import Iterator, Tuple
 
 from geopandas import GeoDataFrame
 from mesa.time import BaseScheduler
-from mesa_geo.geoagent import GeoAgent
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +18,6 @@ class DataScheduler(BaseScheduler):
         agent_keys = list(self._agents.keys())
         if shuffled:
             self.model.random.shuffle(agent_keys)
-
         for key in agent_keys:
             if key in self._agents:
                 yield key, self._agents[key]
@@ -29,10 +26,10 @@ class DataScheduler(BaseScheduler):
         """Execute the step of all agents, one at a time, in random order."""
         for key, agent in self.agent_buffer():
             try:
-                shape = gdf.loc[key]['geometry']
-            except:
+                shape = gdf.loc[key]["geometry"]
+            except KeyError:
                 shape = None
             agent.step(shape)
-        logger.info("scheduler step %f executed" % self.steps)
+        logger.info("scheduler step %f executed", self.steps)
         self.steps += 1
         self.time += 1
