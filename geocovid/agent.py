@@ -1,11 +1,13 @@
 """Agents for a SIR Model."""
 
 import enum
-import numpy as np
 
 from mesa import Model
 from mesa_geo.geoagent import GeoAgent
+import numpy as np
 from shapely.geometry.base import BaseGeometry
+
+from geocovid.constants import STEPS_PER_DAY
 
 
 class Status(enum.IntEnum):
@@ -19,12 +21,7 @@ class Status(enum.IntEnum):
 class PersonAgent(GeoAgent):
     """An agent with fixed initial position and status."""
 
-    def __init__(
-        self,
-        unique_id: str,
-        model: Model,
-        shape: BaseGeometry
-    ):
+    def __init__(self, unique_id: str, model: Model, shape: BaseGeometry):
         """Init method."""
         super().__init__(unique_id, model, shape)
         self.pos = None
@@ -32,9 +29,7 @@ class PersonAgent(GeoAgent):
         self.infection_time = 0
         self.infected_at = 0
 
-    def step(self,
-        shape: BaseGeometry = None
-        ) -> None:
+    def step(self, shape: BaseGeometry = None) -> None:
         """One step of the agent."""
         self.check()
         self.interact()
@@ -44,9 +39,9 @@ class PersonAgent(GeoAgent):
         """Check agent status."""
         if self.status == Status.INFECTED:
             death_prob = self.model.death_prob
-            min_death_period = self.model.min_death_period
+            min_death_period = self.model.min_death_period * STEPS_PER_DAY
             elapsed_time = self.model.schedule.time - self.infected_at
-            treatment_period = self.model.treatment_period
+            treatment_period = self.model.treatment_period * STEPS_PER_DAY
             np.random.seed = self.random.seed
 
             if elapsed_time >= min_death_period:
@@ -54,7 +49,7 @@ class PersonAgent(GeoAgent):
                 if is_alive == 0:
                     self.model.schedule.remove(self)
                     self.model.deaths += 1
-                elif elapsed_time >= self.model.treatment_period:
+                elif elapsed_time >= treatment_period:
                     self.status = Status.RECOVERED
 
     def move(self, shape: BaseGeometry = None) -> None:
@@ -69,12 +64,13 @@ class PersonAgent(GeoAgent):
     def interact(self):
         """An agent interacts with others and may infect them."""
         if self.status is Status.INFECTED:
-            contacts = self.model.grid.get_neighbors_within_distance(self,
-                                                                     self.model.exposure_distance)
-            for c in contacts:
-                if c.status is not Status.INFECTED:
+            contacts = self.model.grid.get_neighbors_within_distance(
+                self, self.model.exposure_distance
+            )
+            for contact in contacts:
+                if contact.status is not Status.INFECTED:
                     infect = self.random.random() <= self.model.infection_prob
                     if infect:
-                        c.status = Status.INFECTED
-                        c.infected_at = self.model.schedule.time
+                        contact.status = Status.INFECTED
+                        contact.infected_at = self.model.schedule.time
                         self.model.infections_step += 1
