@@ -16,6 +16,7 @@ class Status(enum.IntEnum):
     SUSCEPTIBLE = 0
     INFECTED = -1
     RECOVERED = 1
+    DEAD = -2
 
 
 class PersonAgent(GeoAgent):
@@ -47,7 +48,7 @@ class PersonAgent(GeoAgent):
             if elapsed_time >= min_death_period:
                 is_alive = np.random.choice([0, 1], p=[death_prob, 1 - death_prob])
                 if is_alive == 0:
-                    self.model.schedule.remove(self)
+                    self.status = Status.DEAD
                     self.model.deaths += 1
                 elif elapsed_time >= treatment_period:
                     self.status = Status.RECOVERED
