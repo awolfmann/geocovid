@@ -26,12 +26,15 @@ Data provided can be download from [here](https://drive.google.com/drive/folders
 
 ## Improvement Opportunities
 * Data processing:
-    - Reduce timeframe aggregation
-    - Remove Pandas/GeoPandas dependency
+    - Reduce timeframe aggregation.
+    - Remove Pandas/GeoPandas dependency.
     - Remove hardcoded values in SparkSQL.
+    - Remove duplicates.
+    - Degrees to meters projection.
 * Modelling:
     - Include exposure time and confidence intervals.
     - Explore more complex models like SEIR, or Network based.
+    - Batch run with different parameter configs.
 * Visualization:
     - Better usage and extend the  MapModules provided by Mesa-geo library.
 * Productionalization:
@@ -42,6 +45,7 @@ Data provided can be download from [here](https://drive.google.com/drive/folders
     - Improve Error handling.
     - CI integrations.
     - Improve processing performance.
+    - Improve logging levels.
 
 
 
@@ -106,5 +110,10 @@ For testing purposes, pytest is used. Pytest sits on top of unittest and adds so
 For this module it was used tools to lint code with coding good practice.
 - black : code formatter.
 - isort : sort imports.
-- pylint : static code analysis tool.
+- pylint : static code analysis tool. Disabled arguments-differ rule.
 - pre-commit : to run all the linting process before commit.
+
+## References
+* https://github.com/Corvince/mesa-geo/blob/master/examples/GeoSIR/model.py
+* https://github.com/nickmancol/covid-sim-mesa/blob/main/ABMCovid.ipynb
+* https://sedona.apache.org/tutorial/sql-python/#integration-with-geopandas-and-shapely
