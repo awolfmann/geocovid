@@ -28,6 +28,7 @@ def start_spark(app_name: str = "Sedona App", master: str = "local[*]") -> Spark
         )
         .getOrCreate()
     )
+    spark.sql("set spark.sql.files.ignoreCorruptFiles=true")
 
     SedonaRegistrator.registerAll(spark)
 
