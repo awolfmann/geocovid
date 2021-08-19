@@ -1,7 +1,7 @@
 """Geo Covid Model."""
 import enum
 import logging
-from typing import List, Any
+from typing import Any, List
 
 from geopandas import GeoDataFrame
 from mesa import Model
@@ -60,6 +60,7 @@ class GeoCovidModel(Model):
         self.steps = 0
         self.deaths = 0
         self.infections_step = 0
+        self.new_agents = 0
 
         self.datacollector = DataCollector(
             model_reporters={
@@ -68,6 +69,8 @@ class GeoCovidModel(Model):
                 "R": compute_r,
                 "D": compute_d,
                 "IS": compute_is,
+                "A": total_agents,
+                "NA": compute_new_agents,
             },
             agent_reporters={
                 "status": "status",
@@ -95,6 +98,7 @@ class GeoCovidModel(Model):
 
         self.grid.add_agents(new_agents)
         logger.info("new %f agents created", len(new_agents))
+        self.new_agents = len(new_agents)
 
     def _init_infected(self) -> None:
         if isinstance(self.init_infected, List):
@@ -226,3 +230,36 @@ def compute_is(model: Model) -> int:
         amount of new infected agents in a step.
     """
     return model.infections_step
+
+
+def total_agents(model: Model) -> int:
+    """
+    Total amount of agent.
+
+    Parameters
+    ----------
+    model : Model
+        Model to compute metrics from.
+    Returns
+    -------
+    int
+        total amount of agents in a step.
+    """
+    agents = len([agent.status for agent in model.schedule.agents])
+    return agents
+
+
+def compute_new_agents(model: Model) -> int:
+    """
+    Compute new agents per step.
+
+    Parameters
+    ----------
+    model : Model
+        Model to compute metrics from.
+    Returns
+    -------
+    int
+        amount of new agents created in a step.
+    """
+    return model.new_agents
