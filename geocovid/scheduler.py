@@ -26,7 +26,7 @@ class DataScheduler(BaseScheduler):
         """Execute the step of all agents, one at a time, in random order."""
         for key, agent in self.agent_buffer():
             try:
-                shape = gdf.loc[key]["geometry"]
+                shape = gdf.at[key, "geometry"]
             except KeyError:
                 shape = None
             agent.step(shape)
