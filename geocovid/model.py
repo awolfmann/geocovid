@@ -5,7 +5,6 @@ from typing import Any, List
 
 from geopandas import GeoDataFrame
 from mesa import Model
-from mesa.datacollection import DataCollector
 from mesa_geo import GeoSpace
 
 from geocovid.agent import PersonAgent, Status
@@ -17,6 +16,7 @@ from geocovid.constants import (
     MIN_DEATH_PERIOD,
     TREATMENT_PERIOD,
 )
+from geocovid.datacollection import AggDataCollector
 from geocovid.scheduler import DataScheduler
 
 logger = logging.getLogger(__name__)
@@ -62,7 +62,7 @@ class GeoCovidModel(Model):
         self.infections_step = 0
         self.new_agents = 0
 
-        self.datacollector = DataCollector(
+        self.datacollector = AggDataCollector(
             model_reporters={
                 "S": compute_s,
                 "I": compute_i,
