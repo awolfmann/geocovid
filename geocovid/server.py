@@ -7,6 +7,7 @@ from mesa_geo.visualization.MapModule import MapModule
 from mesa_geo.visualization.ModularVisualization import ModularServer
 
 from geocovid.agent import PersonAgent, Status
+from geocovid.constants import MAP_COORDS
 from geocovid.model import GeoCovidModel
 
 
@@ -54,8 +55,6 @@ def infected_draw(agent: PersonAgent) -> Dict:
 
     return portrayal
 
-
-MAP_COORDS = [-34.84, -56.15]
 
 infected_text = InfectedText()
 map_element = MapModule(infected_draw, MAP_COORDS, 10, 700, 700)

@@ -8,7 +8,7 @@ import tarfile
 
 import click
 
-from geocovid.constants import DATA_DIR, ROOT_DIR, TMP_DIR
+from geocovid.constants import DATA_DIR, OUTPUT_DIR, TMP_DIR
 from geocovid.data_pipeline import extract_data_spark, transform_data_spark
 from geocovid.model import GeoCovidModel
 from geocovid.utils import start_spark
@@ -54,12 +54,14 @@ def main():
     date = datetime.now().strftime("%Y_%m_%d-%I:%M")
     logger.info("dumping model vars results to json")
     model_vars_df = gcm.datacollector.get_model_vars_dataframe()
-    model_vars_df.to_json(os.path.join(ROOT_DIR, "results_model_{}.json".format(date)))
+    model_vars_df.to_json(
+        os.path.join(OUTPUT_DIR, "results_model_{}.json".format(date))
+    )
 
     logger.info("dumping agent vars results to json")
     agent_vars_df = gcm.datacollector.get_agent_vars_dataframe()
     agent_vars_df.to_json(
-        os.path.join(ROOT_DIR, "results_agents_{}.json".format(date)), orient="table"
+        os.path.join(OUTPUT_DIR, "results_agents_{}.json".format(date)), orient="table"
     )
 
 
