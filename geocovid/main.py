@@ -1,5 +1,6 @@
 """Main file CLI for run the simulation of the Geo Covid Model."""
 
+from datetime import datetime
 import glob
 import logging
 import os
@@ -50,13 +51,16 @@ def main():
 
             tfile.close()
 
+    date = datetime.now().strftime("%Y_%m_%d-%I:%M")
     logger.info("dumping model vars results to json")
     model_vars_df = gcm.datacollector.get_model_vars_dataframe()
-    model_vars_df.to_json(os.path.join(ROOT_DIR, "results_model.json"))
+    model_vars_df.to_json(os.path.join(ROOT_DIR, "results_model_{}.json".format(date)))
 
     logger.info("dumping agent vars results to json")
     agent_vars_df = gcm.datacollector.get_agent_vars_dataframe()
-    agent_vars_df.to_json(os.path.join(ROOT_DIR, "results_agents.json"), orient="table")
+    agent_vars_df.to_json(
+        os.path.join(ROOT_DIR, "results_agents_{}.json".format(date)), orient="table"
+    )
 
 
 if __name__ == "__main__":
