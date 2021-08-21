@@ -6,22 +6,23 @@ Data provided can be download from [here](https://drive.google.com/drive/folders
 ## Main steps
 * Data processing: data provided are in a compressed files with a set of parquet files inside, for 21 consecutive days.
     - Data columns: Id, timestamp, latitude, longitude, geohash_12.
-    - For the extraction process, data is unpacked and then loaded as Spark Dataframes.
-    -  Then Apache Sedona is used to build and operate over the Geospatial Data. Specially for aggregating data per hour to build a Polygon.
+    - For the extraction process, data is unpacked to tmp/ directory and then loaded as Spark Dataframes.
+    - Apache Sedona is used to build and operate over the Geospatial Data. Specially for aggregating data per hour to build a Polygon.
     - Grouped data of each user per hour building a Polygon. If the Polygon is too big, the centroid is imputed as its position.
     - Finally the output is a GeoPandas Dataframe in order to serve as input for the simulation.
 
 * Model simulation
     - A [SIR Model](https://en.wikipedia.org/wiki/Compartmental_models_in_epidemiology#The_SIR_model) is implemented based on [Mesa](https://mesa.readthedocs.io/en/stable/#) and [Mesa-geo](https://github.com/Corvince/mesa-geo) Python libraries, but extendend to consume data about positions at each step.
+    - Data collection extended to collect agents info once per day instead of each 24hs.
 * Visualization
     - Mesa and Mesa-geo provides some visualization modules.
-    - A 2d (lat, long) histogram is provided as result of the simulation
+    - A 2d (lat, long) histogram is provided as result of the simulation.
     - Timeline evolution with main metrics.
 
 ## Modelling Asumptions
 * Discretized modelling by 1hour step.
 * Grouped data of each user per hour building a Polygon. If the Polygon is too big, the centroid is imputed as its position.
-* Latitutde and Longitude information is used, even geohash_12 has a better precision
+* Latitutde and Longitude information is used, even geohash_12 has a better precision.
 * Exposed time is ignored. If there is a contact between the Polygon in the one hour step, the model add the contact as a possible candidate for a new infected agent.
 
 ## Improvement Opportunities
@@ -87,7 +88,8 @@ geocovid
 │   ├── agent: Agent based on Mesa and mesa-geo libraries.
 │   ├── data_pipeline: Pipeline for extracting and transforming data using Spark and GeoPandas.
 │   ├── scheduler: DataScheduler based on Mesa and mesa-geo libraries.
-│   └── server: Visualization server based on Mesa and mesa-geo libraries.
+│   ├── server: Visualization server based on Mesa and mesa-geo libraries.
+│   └── datacollection: AggDataCollector, extended version to collect data once per day.
 ├── run: script to launch the visualization server.
 ├── data: folder with the provided data.
 └── tests: tests for all the package.
@@ -105,13 +107,15 @@ $ poetry run main.py
 
 ## Testing
 For testing purposes, pytest is used. Pytest sits on top of unittest and adds some capabilities like fixtures and an easier test creation process.
+- DISCLAIMER: pending to implement.
 
 ## Linting
-For this module it was used tools to lint code with coding good practice.
+For this module it was used tools to lint code with coding best practices.
 - black : code formatter.
 - isort : sort imports.
 - pylint : static code analysis tool. Disabled arguments-differ rule.
 - pre-commit : to run all the linting process before commit.
+- DISCLAIMER: some were intentionally ignored.
 
 ## References
 * https://github.com/Corvince/mesa-geo/blob/master/examples/GeoSIR/model.py
