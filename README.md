@@ -57,26 +57,26 @@ This package was developed with [Poetry](https://python-poetry.org/docs/) as an 
 To install Poetry download the source and run it:
 
 install and add it to the shell:
-
+```
 $ curl -sSL https://raw.githubusercontent.com/python-poetry/poetry/master/get-poetry.py | python -
 $ source $HOME/.poetry/env
-
+```
 
 to uninstall Poetry:
-
+```
 $ python get-poetry.py --uninstall
 $ POETRY_UNINSTALL=1 python get-poetry.py
-
+```
 
 #### Install package
 
 To install the package run:
-
+```
 $ poetry install
-
+```
 
 ## Project structure
-
+```
 geocovid
 ├── geocovid:
 │   ├── main: script that run the project, with CLI.
@@ -91,7 +91,7 @@ geocovid
 ├── run: script to launch the visualization server.
 ├── data: folder with the provided data.
 └── tests: tests for all the package.
-
+```
 
 
 ## Running
@@ -99,13 +99,13 @@ For running purposes, a [main.py](./geocovid/main.py) was created. It is also ex
 
 ### Running Procedure
 Example command to run this package:
-
+```
 $ poetry run main.py
-
+```
 #### Visualization
-
+```
 $ poetry run geocovid/visualization/heatmap.py
-
+```
 
 ## Testing
 For testing purposes, pytest is used. Pytest sits on top of unittest and adds some capabilities like fixtures and an easier test creation process.
