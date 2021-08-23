@@ -22,7 +22,7 @@ Data provided can be download from [here](https://drive.google.com/drive/folders
 ## Modelling Asumptions
 * Discretized modelling by 1hour step.
 * Grouped data of each user per hour building a Polygon. If the Polygon is too big, the centroid is imputed as its position.
-* Latitutde and Longitude information is used, even geohash_12 has a better precision.
+* Latitude and Longitude information is used, even geohash_12 has a better precision.
 * Exposed time is ignored. If there is a contact between the Polygon in the one hour step, the model add the contact as a possible candidate for a new infected agent.
 
 ## Improvement Opportunities
@@ -47,8 +47,6 @@ Data provided can be download from [here](https://drive.google.com/drive/folders
     - CI integrations.
     - Improve processing performance.
     - Improve logging levels.
-
-
 
 
 # Installation
@@ -103,6 +101,10 @@ For running purpose, a [main.py](./geocovid/main.py) was created. It is also exe
 Example command to run this package:
 ```
 $ poetry run main.py
+```
+#### Visualization
+```
+$ poetry run geocovid/visualization/heatmap.py
 ```
 
 ## Testing
